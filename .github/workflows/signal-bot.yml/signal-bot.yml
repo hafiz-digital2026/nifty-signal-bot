@@ -1,0 +1,39 @@
+name: NIFTY Signal Bot
+
+on:
+  schedule:
+    # Mon-Fri. GitHub UTC time chalata hai (IST = UTC + 5:30)
+    - cron: "40 3 * * 1-5"   # 09:10 IST -> 12:20 IST tak
+    - cron: "45 6 * * 1-5"   # 12:15 IST -> 15:30 IST tak
+  workflow_dispatch:
+    inputs:
+      stop_at:
+        description: "Kab tak chale (IST HH:MM)"
+        default: "15:30"
+
+concurrency:
+  group: signal-bot
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -r requirements.txt
+      - name: Run bot
+        env:
+          UPSTOX_TOKEN: ${{ secrets.UPSTOX_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_IDS: ${{ secrets.TELEGRAM_CHAT_IDS }}
+          BOT_CODE: ${{ secrets.BOT_CODE }}
+          STOP_AT: ${{ github.event.inputs.stop_at || (github.event.schedule == '40 3 * * 1-5' && '12:20') || '15:30' }}
+        run: |
+          echo "$BOT_CODE" | base64 -d | gunzip > bot.py
+          echo "Bot start"
+          python -u bot.py > /dev/null
+          echo "Bot band"
