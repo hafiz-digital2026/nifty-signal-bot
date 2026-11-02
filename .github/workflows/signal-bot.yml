@@ -4,16 +4,15 @@ on:
   schedule:
     # Mon-Fri. GitHub UTC time chalata hai (IST = UTC + 5:30)
     - cron: "40 3 * * 1-5"   # 09:10 IST -> 12:20 IST tak
-    - cron: "45 6 * * 1-5"   # 12:15 IST -> 15:30 IST tak
+    - cron: "45 6 * * 1-5"   # 12:15 IST -> 15:40 IST tak
   workflow_dispatch:
     inputs:
       stop_at:
         description: "Kab tak chale (IST HH:MM)"
-        default: "15:30"
+        default: "15:40"
 concurrency:
   group: signal-bot
   cancel-in-progress: false
-
 jobs:
   run:
     runs-on: ubuntu-latest
@@ -30,9 +29,42 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_IDS: ${{ secrets.TELEGRAM_CHAT_IDS }}
           BOT_KEY: ${{ secrets.BOT_KEY }}
-          STOP_AT: ${{ github.event.inputs.stop_at || (github.event.schedule == '40 3 * * 1-5' && '12:20') || '15:30' }}
+          STOP_AT: ${{ github.event.inputs.stop_at || (github.event.schedule == '40 3 * * 1-5' && '12:20') || '15:40' }}
         run: |
           openssl enc -d -aes-256-cbc -pbkdf2 -in bot.enc -out bot.py -pass env:BOT_KEY
           echo "Bot start"
           python -u bot.py > /dev/null
           echo "Bot band"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
